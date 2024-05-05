@@ -1,7 +1,8 @@
 [package]
-name = "container_project"
+name = "rust-container"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-linux-syscall = "1.0.0"
+errno = "0.3.8"
+libc = "0.2.154"
