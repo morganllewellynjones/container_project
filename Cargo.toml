@@ -5,4 +5,5 @@ edition = "2021"
 
 [dependencies]
 errno = "0.3.8"
+getopt = "1.1.6"
 libc = "0.2.154"
