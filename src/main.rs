@@ -2,6 +2,9 @@ use std::env;
 use std::process::{self, Stdio};
 
 fn setup_container() -> process::Child {
+// Uses the runc container specification for setup.
+// Link: https://github.com/opencontainers/runc/blob/main/libcontainer/SPEC.md?plain=1
+
     let child = process::Command::new("unshare")
         .args([
             "--pid",
