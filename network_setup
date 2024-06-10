@@ -1,0 +1,39 @@
+# Enable ip forwarding
+su -c "echo 1 > /proc/sys/net/ipv4/ip_forward"
+
+# Create named netns for rust container
+ip netns add rc
+
+# Create a veth pair to virtually connect the rc namespace with the host netns
+ip link add veth-host type veth peer veth-rc
+ip link set veth-rc netns rc
+
+# Bring both veth devices up
+ip link set veth-host up
+ip netns exec rc ip link set veth-rc up
+ip netns exec rc ip link set lo up
+
+# Give each veth an address so that traffic can be routed through them
+ip address add 10.0.3.1/24 dev veth-host
+ip netns exec rc ip address add 10.0.3.2/24 dev veth-rc
+
+# Make veth-host the default gateway for veth-rc
+ip netns exec rc ip route add default via 10.0.3.1
+
+# Get the hosts default gateway interface and store its name
+default_gateway_interface=`ip route | grep default | awk '{print $5}'`
+
+# Store backup of nft tables, to restore after use
+nft list ruleset > nft_backup
+
+# Add filter table, and forward traffic between hosts default gateway and the virtual ethernet pair
+nft add table filter
+nft add chain filter FORWARD '{type filter hook forward priority filter; policy drop;}'
+nft insert rule filter FORWARD iifname $default_gateway_interface oifname veth-host accept
+nft insert rule filter FORWARD iifname veth-host oifname $default_gateway_interface accept
+
+# Masquerade ip addresses from the rc netns as originating from the host netns when routing through the default gateway
+# Allows rust container netns to communicate with the outside world
+nft add table nat
+nft add chain nat POSTROUTING '{type nat hook postrouting priority srcnat; policy accept;}'
+nft add rule nat POSTROUTING oifname $default_gateway_interface iifname veth-host masquerade

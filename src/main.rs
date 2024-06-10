@@ -2,14 +2,17 @@ use std::env;
 use std::process::{self, Stdio};
 
 fn setup_container() -> process::Child {
-// Uses the runc container specification for setup.
-// Link: https://github.com/opencontainers/runc/blob/main/libcontainer/SPEC.md?plain=1
+    // Uses the runc container specification for setup.
+    // Link: https://github.com/opencontainers/runc/blob/main/libcontainer/SPEC.md?plain=1
+    // Additionally, we will set-up a NAT to the childs network namespace and connect it to the
+    // internet
 
+    // Create child and unshare all namespaces except for network namespace
+    // Network namespace will be created and managed with ip command instead
     let child = process::Command::new("unshare")
         .args([
             "--pid",
             "--mount",
-            "--net",
             "--uts",
             "--cgroup",
             "--time",
@@ -26,6 +29,11 @@ fn setup_container() -> process::Child {
         .expect("Failed to create unshared command.");
 
     let ns = child.id().to_string();
+
+    process::Command::new("ip")
+        .args(["netns", "attach", "rc", &ns])
+        .output()
+        .expect("Failed to attach child process to ip managed network namespace");
 
     process::Command::new("mount")
         .args([
@@ -166,11 +174,9 @@ fn setup_container() -> process::Child {
         .expect("Failed to symlink /dev/ptmx");
 
     return child;
-
 }
 
 fn main() {
-   
     let child = setup_container();
     child
         .wait_with_output()

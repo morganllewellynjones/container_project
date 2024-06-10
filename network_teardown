@@ -1,0 +1,8 @@
+# Removing the veth-host also removes the paired veth-rc device
+ip link delete veth-host
+
+# Remove the rust container network namespace
+ip netns delete rc
+
+# Consider flushing the nft ruleset
+# nft flush ruleset
