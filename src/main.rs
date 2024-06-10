@@ -1,4 +1,3 @@
-use std::env;
 use std::process::{self, Stdio};
 
 fn setup_container() -> process::Child {
