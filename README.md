@@ -11,17 +11,17 @@ Run the following scripts in this order:
 
 Pull a docker image and build a container in your local directory.
 ```bash
-./create_container.sh $docker_image_name
+./create_container.sh docker_image_name
 ```
 
 Mount the necessary folders into the filesystem and unshare the namespaces, running a container instance of that file system.
 ```bash
-./run_container.sh { -r | --root } $container_directory_name [ cmd args.. ]
+./run_container.sh { -r container_directory_name } [ cmd arg ]...
 ```
 
 Create the necessary virtual infrastructure to connect the containers network namespace to the internet
 ```bash
-./connect_network.sh $container_directory_name
+./connect_network.sh container_directory_name
 ``` 
 
 Destroy the network infrastructure used to connect the container

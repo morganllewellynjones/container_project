@@ -4,5 +4,9 @@ ip link delete veth-host
 # Remove the rust container network namespace
 ip netns delete rc
 
-# Consider flushing the nft ruleset
+# Flush the nft ruleset
 nft flush ruleset
+
+# Restore the previous nft ruleset
+nft -f nft_backup
+rm -f nft_backup

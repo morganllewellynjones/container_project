@@ -43,6 +43,10 @@ ip netns exec rc ip route add default via 10.0.3.1
 # Get the hosts default gateway interface and store its name
 default_gateway_interface=`ip route show default | awk '{print $5}'`
 
+# Store a backup of the nft tables in case the user wants to restore them later
+# This is done because the teardown_network.sh script will flush the nft ruleset
+nft list ruleset > nft_backup
+
 # Add filter table, and forward traffic between hosts default gateway and the virtual ethernet pair
 nft add table filter
 nft add chain filter FORWARD '{type filter hook forward priority filter; policy drop;}'

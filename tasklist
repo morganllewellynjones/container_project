@@ -1,8 +1,0 @@
-[x] SETUP NAT, Run Container on Isolated Network
-[]	CREATE simple CLI for making networks with the rust container tool
-[] TEST Nates Injection Jailbreak
-[] PROTECT Container using AppArmor
-[] ENABLE Container process to extract image from tarball and run temporary process
-[] ADD Command line options for exec and network exposure
-[] BENCHMARK test docker httpd container vs rustcd httpd container
-[] WRITE paper on findings
