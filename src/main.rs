@@ -1,13 +1,26 @@
-use std::process::{self, Stdio};
+use std::{process};
+use clap::Parser;
 
-fn setup_container() -> process::Child {
+// Program for running a contained process
+#[derive(Parser, Debug)]
+#[command(version, about, long_about = None)]
+struct Config {
+    // Root of the container image filesystem to enter
+    #[arg(short, long)]
+    root: String,
+
+    // Command to execute inside the container
+    #[arg(default_values_t = [String::from("/bin/sh")])]
+    command: Vec<String>,
+}
+
+fn setup_container(config: Config) -> process::Child {
     // Uses the runc container specification for setup.
     // Link: https://github.com/opencontainers/runc/blob/main/libcontainer/SPEC.md?plain=1
     // Additionally, we will set-up a NAT to the childs network namespace and connect it to the
     // internet
-
-    // Create child and unshare all namespaces except for network namespace
-    // Network namespace will be created and managed with ip command instead
+    
+    
     let child = process::Command::new("unshare")
         .args([
             "--pid",
@@ -15,24 +28,17 @@ fn setup_container() -> process::Child {
             "--uts",
             "--cgroup",
             "--time",
+            "--net",
             "--mount-proc",
             "--kill-child",
-            "--root=debian_container",
-            "--wd=debian_container",
+            &["--root", &config.root].join("="),
+            &["--wd", &config.root].join("="),
         ])
-        .args(["/bin/bash"])
-        .stdin(Stdio::inherit())
-        .stderr(Stdio::inherit())
-        .stdout(Stdio::inherit())
+        .arg(&config.command.join(" "))
         .spawn()
         .expect("Failed to create unshared command.");
 
     let ns = child.id().to_string();
-
-    process::Command::new("ip")
-        .args(["netns", "attach", "rc", &ns])
-        .output()
-        .expect("Failed to attach child process to ip managed network namespace");
 
     process::Command::new("mount")
         .args([
@@ -49,6 +55,7 @@ fn setup_container() -> process::Child {
         ])
         .output()
         .expect("Failed mounting file");
+
     process::Command::new("mount")
         .args([
             "--namespace",
@@ -139,27 +146,27 @@ fn setup_container() -> process::Child {
         .expect("Failed changing file permissions");
 
     process::Command::new("mkdir")
-        .args(["0666", "debian_container/dev/null"])
+        .args(["--mode=0666", "debian_container/dev/null"])
         .output()
         .expect("Failed making debian_container/dev subdirectory");
     process::Command::new("mkdir")
-        .args(["0666", "debian_container/dev/zero"])
+        .args(["--mode=0666", "debian_container/dev/zero"])
         .output()
         .expect("Failed making debian_container/dev subdirectory");
     process::Command::new("mkdir")
-        .args(["0666", "debian_container/dev/full"])
+        .args(["--mode=0666", "debian_container/dev/full"])
         .output()
         .expect("Failed making debian_container/dev subdirectory");
     process::Command::new("mkdir")
-        .args(["0666", "debian_container/dev/tty"])
+        .args(["--mode=0666", "debian_container/dev/tty"])
         .output()
         .expect("Failed making debian_container/dev subdirectory");
     process::Command::new("mkdir")
-        .args(["0666", "debian_container/dev/random"])
+        .args(["--mode=0666", "debian_container/dev/random"])
         .output()
         .expect("Failed making debian_container/dev subdirectory");
     process::Command::new("mkdir")
-        .args(["0666", "debian_container/dev/urandom"])
+        .args(["--mode=0666", "debian_container/dev/urandom"])
         .output()
         .expect("Failed making debian_container/dev subdirectory");
     process::Command::new("mount")
@@ -176,8 +183,11 @@ fn setup_container() -> process::Child {
 }
 
 fn main() {
-    let child = setup_container();
-    child
-        .wait_with_output()
+
+    let config: Config = Config::parse();
+
+    let jail: process::Child = setup_container(config);
+
+    jail.wait_with_output()
         .expect("Failed to execute unshared command.");
 }

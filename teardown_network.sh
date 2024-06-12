@@ -5,4 +5,4 @@ ip link delete veth-host
 ip netns delete rc
 
 # Consider flushing the nft ruleset
-# nft flush ruleset
+nft flush ruleset

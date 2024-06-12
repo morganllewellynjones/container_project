@@ -1,20 +1,26 @@
-##Author: Morgan Jones
+## Author: Morgan Jones
 
-##Mission Statement
-The goal of this project is to create a program that runs a container, such as one pulled from docker hub. The project is to be written in Rust to take advantage of Rust's exceptional performance ceiling (as opposed to the more conventional container approach using Go). Higher performance could mean economic benefits to using said container runtime environment since container technologies tend to run many simultaneous instances on servers.
+## Mission Statement
+The purpose of this project is to create a container runtime service, similar to Docker or Podman, but in Rust. The idea ultimately being that Rust has a higher performance ceiling than Go, and may be able to save energy and resources in long running container instances. In short, my mission statement is exactly the same as the project Railcar, which has been archived. As a student, the other purpose of this project is to familiarize myself with linux tools for managing namespaces, creating and connecting network interfaces, etc.
 
-##Challenges
-- The inclusion of system calls will likely necessitate the use of unsafe Rust, offsetting some of Rust's security advantages.
+## State of the Project
+This project is in its infancy, but it effectively prototypes the basic concepts of containers on a single container process. It has no system daemon for managing multiple containers.
 
-##Steps to completion
-- [x] Create a process using unshare that shares none of its parent namespaces
-- [x] Chroot to move the process into an image filesystem (tarball)
-- [] Create an image filesystem during execution of the program from a given tarball
-- [] Collect command line arguments from user in a coherent, clean and upgradeable way
-- [] Provide user with the ability to share namespaces with running container in a controlled way
-    - In particular provide a method for users to expose ports and to mount filesystems to the container
-- [] When the user exits the container the process should not save state, when they run the program again it does so from the base image
-- [] Benchmark the performance and compare it to a primitive Docker container
+## How to test this Project
+Run the following scripts in this order:
 
-##What I am not doing
-- This is not attempting to replicate any of Dockers build engine capabilities. But you should be able to build an image using Docker build and then run that image in this container system. Currently a create_container program is available to easily export a docker image into a static file system.
+Pull a docker image and build a container in your local directory.
+`./create_container.sh $docker_image_name`
+
+Mount the necessary folders into the filesystem and unshare the namespaces, running a container instance of that file system.
+`./run_container.sh $container_directory_name` 
+
+Create the necessary virtual infrastructure to connect the containers network namespace to the internet
+`./connect_network.sh $container_directory_name` 
+
+Destroy the network infrastructure used to connect the container
+`./teardown_network.sh`
+
+> Note: It is necessary to perform this step before you connect a new container network. Also, it will flush your nft tables. If you want to preserve your nft tables, a backup of your ruleset is preserved under /data/nft_backup.
+
+## Future Plans

@@ -1,8 +1,28 @@
 # Enable ip forwarding
-su -c "echo 1 > /proc/sys/net/ipv4/ip_forward"
+set -eux
+
+# We need to setup the network for a running container
+# The assumption is that before running this script you have created a container using the ./run_container.sh script
+if [ "$#" -eq 0 ]; then
+	echo "Please provide the name of a container image directory from which to establish a network."
+fi
+
+# Provide the container with your hosts and resolve file, necessary for accessing the internet
+# In future we should obfuscate your file information, but for now we pass it directly
+container=$1
+cp /etc/hosts $container/etc/
+cp /etc/resolv.conf $container/etc/
+
+# It is very likely in the context of this container project that the most recent unshare process is the container process we wish to target
+# In future a daemon needs to be implemented that can properly track and identify container processes so that it can reliably link containers to the appropriate network devices
+pid=`pgrep -n unshare`
+
+if [ `cat /proc/sys/net/ipv4/ip_forward` != 1 ]; then
+	su -c "echo 1 > /proc/sys/net/ipv4/ip_forward"
+fi
 
 # Create named netns for rust container
-ip netns add rc
+ip netns attach rc $pid
 
 # Create a veth pair to virtually connect the rc namespace with the host netns
 ip link add veth-host type veth peer veth-rc
@@ -21,10 +41,7 @@ ip netns exec rc ip address add 10.0.3.2/24 dev veth-rc
 ip netns exec rc ip route add default via 10.0.3.1
 
 # Get the hosts default gateway interface and store its name
-default_gateway_interface=`ip route | grep default | awk '{print $5}'`
-
-# Store backup of nft tables, to restore after use
-nft list ruleset > nft_backup
+default_gateway_interface=`ip route show default | awk '{print $5}'`
 
 # Add filter table, and forward traffic between hosts default gateway and the virtual ethernet pair
 nft add table filter
