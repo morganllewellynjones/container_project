@@ -10,16 +10,24 @@ This project is in its infancy, but it effectively prototypes the basic concepts
 Run the following scripts in this order:
 
 Pull a docker image and build a container in your local directory.
-`./create_container.sh $docker_image_name`
+```bash
+./create_container.sh $docker_image_name
+```
 
 Mount the necessary folders into the filesystem and unshare the namespaces, running a container instance of that file system.
-`./run_container.sh { -r | --root } $container_directory_name [ cmd args.. ]`
+```bash
+./run_container.sh { -r | --root } $container_directory_name [ cmd args.. ]
+```
 
 Create the necessary virtual infrastructure to connect the containers network namespace to the internet
-`./connect_network.sh $container_directory_name` 
+```bash
+./connect_network.sh $container_directory_name
+``` 
 
 Destroy the network infrastructure used to connect the container
-`./teardown_network.sh`
+```bash
+./teardown_network.sh
+```
 
 > Note: It is necessary to perform this step before you connect a new container network. Also, it will flush your nft tables. If you want to preserve your nft tables, a backup of your ruleset is preserved under /data/nft_backup.
 
