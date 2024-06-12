@@ -13,7 +13,7 @@ Pull a docker image and build a container in your local directory.
 `./create_container.sh $docker_image_name`
 
 Mount the necessary folders into the filesystem and unshare the namespaces, running a container instance of that file system.
-`./run_container.sh $container_directory_name` 
+`./run_container.sh { -r | --root } $container_directory_name [ cmd args.. ]`
 
 Create the necessary virtual infrastructure to connect the containers network namespace to the internet
 `./connect_network.sh $container_directory_name` 
@@ -24,3 +24,4 @@ Destroy the network infrastructure used to connect the container
 > Note: It is necessary to perform this step before you connect a new container network. Also, it will flush your nft tables. If you want to preserve your nft tables, a backup of your ruleset is preserved under /data/nft_backup.
 
 ## Future Plans
+The goal of this project was to find a more performant run-time service using Rust. At present, the service is not comparable enough to docker for a benchmark test. The next step of this process is to create a network bridge, and a daemon for the service that can stop and start multiple containers. While it cannot compare to the feature-set of docker, I can compare a single set of primitive defaults as a proof of concept. The plan is to run both the docker daemon and the rust container daemon, both hosting a suite of httpd containers serving webpages. Each daemon should be forced to serve a very high volume of requests over several hours, and I'll measure the memory impact of each.
