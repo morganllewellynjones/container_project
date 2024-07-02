@@ -1,4 +1,3 @@
-# Enable ip forwarding
 set -eux
 
 # We need to setup the network for a running container
