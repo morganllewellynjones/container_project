@@ -1,4 +1,4 @@
-use std::{process};
+use std::process;
 use clap::Parser;
 
 // Program for running a contained process
@@ -17,9 +17,6 @@ struct Config {
 fn setup_container(config: Config) -> process::Child {
     // Uses the runc container specification for setup.
     // Link: https://github.com/opencontainers/runc/blob/main/libcontainer/SPEC.md?plain=1
-    // Additionally, we will set-up a NAT to the childs network namespace and connect it to the
-    // internet
-    
     
     let child = process::Command::new("unshare")
         .args([
@@ -49,7 +46,7 @@ fn setup_container(config: Config) -> process::Child {
             "--source",
             "/proc",
             "--target",
-            "debian_container/proc",
+            &[&config.root, "proc"].join("/"),
             "--options",
             "noexec,nosuid,nodev",
         ])
@@ -65,7 +62,7 @@ fn setup_container(config: Config) -> process::Child {
             "--source",
             "/dev",
             "--target",
-            "debian_container/dev",
+            &[&config.root, "dev"].join("/"),
             "--options",
             "noexec,strictatime",
         ])
@@ -80,7 +77,7 @@ fn setup_container(config: Config) -> process::Child {
             "--source",
             "/dev/shm",
             "--target",
-            "debian_container/dev/shm",
+            &[&config.root, "dev/shm"].join("/"),
             "--options",
             "noexec,nosuid,nodev",
         ])
@@ -95,7 +92,7 @@ fn setup_container(config: Config) -> process::Child {
             "--source",
             "/dev/mqueue",
             "--target",
-            "debian_container/dev/mqueue",
+            &[&config.root, "dev/mqueue"].join("/"),
             "--options",
             "noexec,nosuid,nodev",
         ])
@@ -110,7 +107,7 @@ fn setup_container(config: Config) -> process::Child {
             "--source",
             "/dev/pts",
             "--target",
-            "debian_container/dev/pts",
+            &[&config.root, "dev/pts"].join("/"),
             "--options",
             "noexec,nosuid",
         ])
@@ -125,7 +122,7 @@ fn setup_container(config: Config) -> process::Child {
             "--source",
             "/sys",
             "--target",
-            "debian_container/sys",
+            &[&config.root, "sys"].join("/"),
             "--options",
             "noexec,nosuid,nodev,rdonly",
         ])
@@ -133,18 +130,18 @@ fn setup_container(config: Config) -> process::Child {
         .expect("Failed mounting file");
 
     process::Command::new("chmod")
-        .args(["755", "debian_container/dev"])
+        .args(["755", &[&config.root, "dev"].join("/")])
         .output()
         .expect("Failed changing file permissions");
     process::Command::new("chmod")
-        .args(["1777", "debian_container/dev/shm"])
+        .args(["1777", &[&config.root, "dev/shm"].join("/")])
         .output()
         .expect("Failed changing file permissions");
     process::Command::new("chmod")
-        .args(["620", "debian_container/dev/pts"])
+        .args(["620", &[&config.root, "dev/pts"].join("/")])
         .output()
         .expect("Failed changing file permissions");
-
+/*
     process::Command::new("mkdir")
         .args(["--mode=0666", "debian_container/dev/null"])
         .output()
@@ -169,13 +166,13 @@ fn setup_container(config: Config) -> process::Child {
         .args(["--mode=0666", "debian_container/dev/urandom"])
         .output()
         .expect("Failed making debian_container/dev subdirectory");
+*/
     process::Command::new("mount")
-        .args(["/etc/", "debian_container/etc"])
+        .args(["/etc/", &[&config.root, "etc"].join("/")])
         .output()
         .expect("Failed to mount /etc folder");
-
     process::Command::new("ln")
-        .args(["-s", "/dev/ptmx", "debian_container/dev/ptmx"])
+        .args(["-s", "/dev/ptmx", &[&config.root, "dev/ptmx"].join("/")])
         .output()
         .expect("Failed to symlink /dev/ptmx");
 

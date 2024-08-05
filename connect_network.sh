@@ -12,8 +12,8 @@ container=$1
 cp /etc/hosts $container/etc/
 cp /etc/resolv.conf $container/etc/
 
-# It is very likely in the context of this container project that the most recent unshare process is the container process we wish to target
-# In future a daemon needs to be implemented that can properly track and identify container processes so that it can reliably link containers to the appropriate network devices
+# It is very likely in the context of this container project that the most recent unshare process is the container process we wish to target.
+# In the future we should integrate this bash script into the rust code. The rust code can accurately track exactly which process we want to target so we don't have to guess.
 pid=`pgrep -n unshare`
 
 if [ `cat /proc/sys/net/ipv4/ip_forward` != 1 ]; then
