@@ -4,7 +4,7 @@
 The purpose of this project is to create a container runtime service, similar to Docker or Podman, but in Rust. The idea ultimately being that Rust has a higher performance ceiling than Go, and may be able to save energy and resources in long running container instances. In short, my mission statement is exactly the same as the project Railcar, which has been archived. As a student, the other purpose of this project is to familiarize myself with linux tools for managing namespaces, creating and connecting network interfaces, etc.
 
 ## State of the Project
-This project effectively prototypes the basic concepts of containers on a single container process. It may continue to act as a staging ground for me to test concepts and new ideas, but there are enough similar projects out there (like Youki) with more community support that my attention has largely moved to researching other implementations, and finding a project elsewhere that I would like to support.
+This project effectively prototypes the basic concepts of containers on a single container process. It may continue to act as a staging ground for me to test concepts and new ideas. Otherwise, Youki has a similar goal and quite a lot of community support and could use some help.
 
 ## How to test this Project
 This project can only be tested on Linux. In fact, I've only tested it on Debian 12, but I suspect that any Linux based operating system should do the trick. You will need nftables and ip installed, and you will need some way of pulling container images to test. The create_container.sh script assumes you have docker installed, but you could of course pull an image with podman or any similar service.
