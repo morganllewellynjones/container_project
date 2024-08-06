@@ -141,32 +141,32 @@ fn setup_container(config: Config) -> process::Child {
         .args(["620", &[&config.root, "dev/pts"].join("/")])
         .output()
         .expect("Failed changing file permissions");
-/*
-    process::Command::new("mkdir")
-        .args(["--mode=0666", "debian_container/dev/null"])
+
+    process::Command::new("mknod")
+        .args(["--mode=0666", "debian_container/dev/null", "c", "1", "3"])
         .output()
         .expect("Failed making debian_container/dev subdirectory");
-    process::Command::new("mkdir")
-        .args(["--mode=0666", "debian_container/dev/zero"])
+    process::Command::new("mknod")
+        .args(["--mode=0666", "debian_container/dev/zero", "c", "1", "5"])
         .output()
         .expect("Failed making debian_container/dev subdirectory");
-    process::Command::new("mkdir")
-        .args(["--mode=0666", "debian_container/dev/full"])
+    process::Command::new("mknod")
+        .args(["--mode=0666", "debian_container/dev/full", "c", "1", "7"])
         .output()
         .expect("Failed making debian_container/dev subdirectory");
-    process::Command::new("mkdir")
-        .args(["--mode=0666", "debian_container/dev/tty"])
+    process::Command::new("mknod")
+        .args(["--mode=0666", "debian_container/dev/tty", "c", "5", "0"])
         .output()
         .expect("Failed making debian_container/dev subdirectory");
-    process::Command::new("mkdir")
-        .args(["--mode=0666", "debian_container/dev/random"])
+    process::Command::new("mknod")
+        .args(["--mode=0666", "debian_container/dev/random", "c", "1", "8"])
         .output()
         .expect("Failed making debian_container/dev subdirectory");
-    process::Command::new("mkdir")
-        .args(["--mode=0666", "debian_container/dev/urandom"])
+    process::Command::new("mknod")
+        .args(["--mode=0666", "debian_container/dev/urandom", "c", "1", "9"])
         .output()
         .expect("Failed making debian_container/dev subdirectory");
-*/
+
     process::Command::new("mount")
         .args(["/etc/", &[&config.root, "etc"].join("/")])
         .output()
