@@ -7,7 +7,6 @@ mkdir $1_container
 mv $1_container.tar $1_container/
 cd $1_container
 tar -xf $1_container.tar
-touch CONTAINER_ROOT
 rm -f $1_container.tar
 
 docker container rm $1

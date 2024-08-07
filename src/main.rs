@@ -1,5 +1,5 @@
-use std::process;
 use clap::Parser;
+use std::process;
 
 // Program for running a contained process
 #[derive(Parser, Debug)]
@@ -17,9 +17,10 @@ struct Config {
 fn setup_container(config: Config) -> process::Child {
     // Uses the runc container specification for setup.
     // Link: https://github.com/opencontainers/runc/blob/main/libcontainer/SPEC.md?plain=1
-    
+
     let child = process::Command::new("unshare")
         .args([
+            "--map-root-user",
             "--pid",
             "--mount",
             "--uts",
@@ -180,7 +181,6 @@ fn setup_container(config: Config) -> process::Child {
 }
 
 fn main() {
-
     let config: Config = Config::parse();
 
     let jail: process::Child = setup_container(config);
