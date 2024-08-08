@@ -21,9 +21,6 @@ fn setup_container(config: Config) -> process::Child {
     // Uses the runc container specification for setup.
     // Link: https://github.com/opencontainers/runc/blob/main/libcontainer/SPEC.md?plain=1
 
-    let full_command = &config.command.join(" ");
-    println!("{}", full_command);
-
     let child = process::Command::new("unshare")
         .args([
             "--map-root-user",
@@ -38,7 +35,7 @@ fn setup_container(config: Config) -> process::Child {
             &["--root", &config.root].join("="),
             &["--wd", &config.root].join("="),
         ])
-        .arg(&config.command.join(" "))
+        .args(&config.command)
         .stdin(Stdio::piped())
         .stdout(Stdio::piped())
         .stderr(Stdio::piped())
