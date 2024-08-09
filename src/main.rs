@@ -36,9 +36,9 @@ fn setup_container(config: Config) -> process::Child {
             &["--wd", &config.root].join("="),
         ])
         .args(&config.command)
-        .stdin(Stdio::piped())
-        .stdout(Stdio::piped())
-        .stderr(Stdio::piped())
+        .stdin(Stdio::inherit())
+        .stdout(Stdio::inherit())
+        .stderr(Stdio::inherit())
         .spawn()
         .expect("Failed to create unshared command.");
 
@@ -191,11 +191,8 @@ fn main() {
 
     let jail: process::Child = setup_container(config);
 
-    let output = jail
-        .wait_with_output()
+    jail.wait_with_output()
         .expect("Failed to execute unshared command.");
-
-    println!("{:?}", output);
 }
 
 #[cfg(test)]
